@@ -1,5 +1,5 @@
 import { Colors } from '@/constants/Colors';
-import { rooms } from '@/data/rooms';
+import { rooms } from '@/features/rooms/data/rooms';
 import { getRelativeTime } from '@/utils/date';
 import React, { useState } from 'react';
 import {
@@ -16,7 +16,6 @@ import {
 } from 'react-native';
 
 const ChatexoMainScreen = () => {
-  const [activeTab, setActiveTab] = useState('Rooms');
   const [searchText, setSearchText] = useState('');
   const colorScheme = useColorScheme();
   const themeColors = Colors[colorScheme ?? 'light'];
@@ -24,10 +23,8 @@ const ChatexoMainScreen = () => {
   const filteredRooms = rooms.filter((room) => {
     const lowerSearch = searchText.toLowerCase();
 
-    // Match against room title
     const titleMatch = room.title.toLowerCase().includes(lowerSearch);
 
-    // Match against any participant name
     const participantMatch = room.participants.some((p) =>
       p.name.toLowerCase().includes(lowerSearch)
     );
@@ -35,31 +32,6 @@ const ChatexoMainScreen = () => {
     return titleMatch || participantMatch;
   });
 
-  interface TabButtonProps {
-    title: string;
-    isActive: boolean;
-    onPress: () => void;
-  }
-
-  const TabButton: React.FC<TabButtonProps> = ({ title, isActive, onPress }) => (
-    <TouchableOpacity
-      style={[
-        styles.tabButton,
-        isActive && { borderBottomColor: themeColors.tint },
-      ]}
-      onPress={onPress}
-    >
-      <Text
-        style={[
-          styles.tabText,
-          { color: themeColors.icon },
-          isActive && { color: themeColors.text },
-        ]}
-      >
-        {title}
-      </Text>
-    </TouchableOpacity>
-  );
   interface Room {
     id: number;
     title: string;
@@ -153,22 +125,6 @@ const ChatexoMainScreen = () => {
           </TouchableOpacity>
         </View>
       </View>
-
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.tabScrollContainer}
-        style={styles.tabScroll}
-      >
-        {['Rooms', 'Users', 'Voice Chat', 'Events'].map((tab) => (
-          <TabButton
-            key={tab}
-            title={tab}
-            isActive={activeTab === tab}
-            onPress={() => setActiveTab(tab)}
-          />
-        ))}
-      </ScrollView>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.roomList}>
@@ -271,14 +227,6 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-  },
-  tabScroll: {
-    maxHeight: 70,
-  },
-  tabScrollContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
   },
   tabButton: {
     paddingVertical: 8,
