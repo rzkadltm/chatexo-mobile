@@ -12,3 +12,21 @@
 -keep class com.facebook.react.turbomodule.** { *; }
 
 # Add any project specific keep options here:
+# WebRTC ProGuard Rules - CRITICAL for release builds
+-keep class com.oney.WebRTCModule.** { *; }
+-keep class org.webrtc.** { *; }
+-keep class com.facebook.react.bridge.** { *; }
+-keepclassmembers class org.webrtc.** { *; }
+-keepclassmembers class com.oney.WebRTCModule.** { *; }
+
+# Keep WebRTC native methods
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+
+# Keep WebRTC JNI
+-keep class * extends org.webrtc.** { *; }
+
+# Socket.io client
+-keep class io.socket.** { *; }
+-keep class com.github.nkzawa.** { *; }
