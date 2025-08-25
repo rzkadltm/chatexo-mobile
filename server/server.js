@@ -202,7 +202,7 @@ setInterval(() => {
   }
 }, 300000); // 5 minutes
 
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 ChatExo Signaling Server running on port ${PORT}`);
   console.log(`📡 Server URL: http://localhost:${PORT}`);
   console.log(`🔐 Room password: "secret"`);
