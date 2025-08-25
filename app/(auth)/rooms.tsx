@@ -26,7 +26,7 @@ const ChatexoMainScreen = () => {
     const titleMatch = room.title.toLowerCase().includes(lowerSearch);
 
     const participantMatch = room.participants.some((p) =>
-      p.name.toLowerCase().includes(lowerSearch)
+      p.name.toLowerCase().includes(lowerSearch),
     );
 
     return titleMatch || participantMatch;
@@ -46,12 +46,14 @@ const ChatexoMainScreen = () => {
     room: Room;
   }
 
-  const  RoomItem: React.FC<RoomItemProps> = ({ room }) => (
+  const RoomItem: React.FC<RoomItemProps> = ({ room }) => (
     <View style={[styles.roomItem, { backgroundColor: themeColors.background }]}>
       <View style={styles.roomHeader}>
         <View style={styles.flagContainer}>
           {room.flags.map((flag, index) => (
-            <Text key={index} style={styles.roomFlag}>{flag}</Text>
+            <Text key={index} style={styles.roomFlag}>
+              {flag}
+            </Text>
           ))}
         </View>
         <Text style={[styles.dateCreatedText, { color: '#48BB78' }]}>
@@ -59,9 +61,7 @@ const ChatexoMainScreen = () => {
         </Text>
       </View>
 
-      <Text style={[styles.roomTitle, { color: themeColors.text }]}>
-        {room.title}
-      </Text>
+      <Text style={[styles.roomTitle, { color: themeColors.text }]}>{room.title}</Text>
 
       <View style={styles.roomFooterAligned}>
         <View style={styles.leftContent}>
@@ -70,10 +70,7 @@ const ChatexoMainScreen = () => {
               <Image
                 key={index}
                 source={{ uri: participant.image }}
-                style={[
-                  styles.participantImage,
-                  index > 0 && styles.spacedImage
-                ]}
+                style={[styles.participantImage, index > 0 && styles.spacedImage]}
               />
             ))}
 
@@ -98,7 +95,6 @@ const ChatexoMainScreen = () => {
           </View>
         </View>
       </View>
-
     </View>
   );
 
@@ -109,7 +105,12 @@ const ChatexoMainScreen = () => {
       <View style={styles.header}>
         <Text style={[styles.logo, { color: themeColors.text }]}>Chatexo</Text>
         <View style={styles.searchAndCreateWrapper}>
-          <View style={[styles.searchContainer, { backgroundColor: colorScheme === 'dark' ? '#1F2122' : '#F7FAFC' }]}>
+          <View
+            style={[
+              styles.searchContainer,
+              { backgroundColor: colorScheme === 'dark' ? '#1F2122' : '#F7FAFC' },
+            ]}
+          >
             <Text style={[styles.searchIcon, { color: themeColors.icon }]}>🔍</Text>
             <TextInput
               style={[styles.searchInput, { color: themeColors.text }]}
@@ -120,7 +121,12 @@ const ChatexoMainScreen = () => {
             />
           </View>
 
-          <TouchableOpacity style={styles.createRoomButton} onPress={() => { /* Add logic here */ }}>
+          <TouchableOpacity
+            style={styles.createRoomButton}
+            onPress={() => {
+              /* Add logic here */
+            }}
+          >
             <Text style={styles.createRoomButtonText}>＋</Text>
           </TouchableOpacity>
         </View>

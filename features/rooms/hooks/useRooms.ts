@@ -14,18 +14,21 @@ export function useRooms(allRooms: Room[], options: UseRoomsOptions = {}) {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  const fetchRooms = useCallback(async (pageNum: number) => {
-    setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, fetchDelayMs)); // simulate API delay
+  const fetchRooms = useCallback(
+    async (pageNum: number) => {
+      setLoading(true);
+      await new Promise((resolve) => setTimeout(resolve, fetchDelayMs)); // simulate API delay
 
-    const startIndex = (pageNum - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const newRooms = allRooms.slice(startIndex, endIndex);
+      const startIndex = (pageNum - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+      const newRooms = allRooms.slice(startIndex, endIndex);
 
-    setRooms(prev => [...prev, ...newRooms]);
-    setHasMore(endIndex < allRooms.length);
-    setLoading(false);
-  }, [allRooms, pageSize, fetchDelayMs]);
+      setRooms((prev) => [...prev, ...newRooms]);
+      setHasMore(endIndex < allRooms.length);
+      setLoading(false);
+    },
+    [allRooms, pageSize, fetchDelayMs],
+  );
 
   const loadMore = useCallback(() => {
     if (!loading && hasMore) {
