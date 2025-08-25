@@ -3,7 +3,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 import { rooms as allRooms } from '@/data/rooms';
 import { useRooms } from '@/features/rooms/hooks/useRooms';
-import { RoomItemProps } from "@/features/rooms/types/roomTypes";
+import { RoomItemProps } from '@/features/rooms/types/roomTypes';
 import { getRelativeTime } from '@/utils/date';
 import React, { useRef, useState } from 'react';
 import {
@@ -16,8 +16,9 @@ import {
   TextInput,
   TouchableOpacity,
   useColorScheme,
-  View
+  View,
 } from 'react-native';
+import uuid from 'react-native-uuid';
 
 const ChatexoMainScreen = () => {
   const [searchText, setSearchText] = useState('');
@@ -34,20 +35,25 @@ const ChatexoMainScreen = () => {
     const lowerSearch = searchText.toLowerCase();
     return (
       room.title.toLowerCase().includes(lowerSearch) ||
-      room.participants.some((p) =>
-        p.name.toLowerCase().includes(lowerSearch)
-      )
+      room.participants.some((p) => p.name.toLowerCase().includes(lowerSearch))
     );
   });
 
   const RoomItem: React.FC<RoomItemProps> = ({ room }) => (
-    <ThemedView style={[styles.roomItem, { 
-      shadowColor: colorScheme === 'dark' ? '#000' : '#000',
-    }]}>
+    <ThemedView
+      style={[
+        styles.roomItem,
+        {
+          shadowColor: colorScheme === 'dark' ? '#000' : '#000',
+        },
+      ]}
+    >
       <View style={styles.roomHeader}>
         <View style={styles.flagContainer}>
           {room.flags.map((flag, index) => (
-            <Text key={index} style={styles.roomFlag}>{flag}</Text>
+            <Text key={`${flag}-${index}`} style={styles.roomFlag}>
+              {flag}
+            </Text>
           ))}
         </View>
         <ThemedText style={[styles.dateCreatedText, { color: themeColors.tint }]}>
@@ -62,28 +68,26 @@ const ChatexoMainScreen = () => {
       <View style={styles.roomFooterAligned}>
         <View style={styles.leftContent}>
           <View style={styles.participantImages}>
-            {room.participants.slice(0, 4).map((participant, index) => (
+            {room.participants.slice(0, 4).map((participant) => (
               <Image
-                key={index}
+                key={uuid.v4().toString()}
                 source={{ uri: participant.image }}
-                style={[
-                  styles.participantImage,
-                  { borderColor: themeColors.background },
-                  index > 0 && styles.spacedImage
-                ]}
+                style={[styles.participantImage, { borderColor: themeColors.background }]}
               />
             ))}
 
             {room.totalUsers > 4 && (
-              <View style={[
-                styles.participantImage, 
-                styles.moreParticipants, 
-                styles.spacedImage,
-                { 
-                  backgroundColor: colorScheme === 'dark' ? '#2D3748' : '#E2E8F0',
-                  borderColor: themeColors.background 
-                }
-              ]}>
+              <View
+                style={[
+                  styles.participantImage,
+                  styles.moreParticipants,
+                  styles.spacedImage,
+                  {
+                    backgroundColor: colorScheme === 'dark' ? '#2D3748' : '#E2E8F0',
+                    borderColor: themeColors.background,
+                  },
+                ]}
+              >
                 <ThemedText style={[styles.moreParticipantsText, { color: themeColors.icon }]}>
                   +{room.totalUsers - 4}
                 </ThemedText>
@@ -98,9 +102,16 @@ const ChatexoMainScreen = () => {
             </View>
 
             <TouchableOpacity style={[styles.joinButton, { backgroundColor: themeColors.tint }]}>
-              <Text style={[styles.joinButtonText, { 
-                color: colorScheme === 'dark' ? themeColors.text : '#fff' 
-              }]}>Join</Text>
+              <Text
+                style={[
+                  styles.joinButtonText,
+                  {
+                    color: colorScheme === 'dark' ? themeColors.text : '#fff',
+                  },
+                ]}
+              >
+                Join
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -113,11 +124,18 @@ const ChatexoMainScreen = () => {
       <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} />
 
       <ThemedView style={styles.header}>
-        <ThemedText style={styles.logo} type="title">Chatexo</ThemedText>
+        <ThemedText style={styles.logo} type="title">
+          Chatexo
+        </ThemedText>
         <View style={styles.searchAndCreateWrapper}>
-          <View style={[styles.searchContainer, { 
-            backgroundColor: colorScheme === 'dark' ? '#1F2122' : '#F7FAFC' 
-          }]}>
+          <View
+            style={[
+              styles.searchContainer,
+              {
+                backgroundColor: colorScheme === 'dark' ? '#1F2122' : '#F7FAFC',
+              },
+            ]}
+          >
             <Text style={[styles.searchIcon, { color: themeColors.icon }]}>🔍</Text>
             <TextInput
               style={[styles.searchInput, { color: themeColors.text }]}
@@ -128,10 +146,20 @@ const ChatexoMainScreen = () => {
             />
           </View>
 
-          <TouchableOpacity style={[styles.createRoomButton, { backgroundColor: themeColors.tint }]} onPress={() => {}}>
-            <Text style={[styles.createRoomButtonText, { 
-              color: colorScheme === 'dark' ? themeColors.text : '#fff' 
-            }]}>＋</Text>
+          <TouchableOpacity
+            style={[styles.createRoomButton, { backgroundColor: themeColors.tint }]}
+            onPress={() => {}}
+          >
+            <Text
+              style={[
+                styles.createRoomButtonText,
+                {
+                  color: colorScheme === 'dark' ? themeColors.text : '#fff',
+                },
+              ]}
+            >
+              ＋
+            </Text>
           </TouchableOpacity>
         </View>
       </ThemedView>
@@ -139,7 +167,7 @@ const ChatexoMainScreen = () => {
       <FlatList
         ref={flatListRef}
         data={filteredRooms}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item, index) => `${item.id}-${index}`}
         contentContainerStyle={styles.roomList}
         renderItem={({ item }) => <RoomItem room={item} />}
         onEndReached={() => {
@@ -148,10 +176,10 @@ const ChatexoMainScreen = () => {
         onEndReachedThreshold={0.5}
         ListFooterComponent={
           loading ? (
-            <ActivityIndicator 
-              style={{ marginVertical: 16 }} 
-              size="large" 
-              color={themeColors.tint} 
+            <ActivityIndicator
+              style={{ marginVertical: 16 }}
+              size="large"
+              color={themeColors.tint}
             />
           ) : null
         }
@@ -161,21 +189,10 @@ const ChatexoMainScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-  },
-  logo: {
-    marginBottom: 15,
-    marginTop: 20,
-  },
-  searchAndCreateWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+  container: { flex: 1 },
+  header: { paddingHorizontal: 20, paddingVertical: 15 },
+  logo: { marginBottom: 15, marginTop: 20 },
+  searchAndCreateWrapper: { flexDirection: 'row', alignItems: 'center' },
   searchContainer: {
     flex: 3,
     flexDirection: 'row',
@@ -192,36 +209,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  createRoomButtonText: {
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
+  createRoomButtonText: { fontSize: 22, fontWeight: 'bold' },
   roomFooterAligned: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 8,
   },
-  statusAndJoinRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  leftContent: {
-    flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'center',
-  },
-  userStatusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-    gap: 10,
-  },
-  statusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+  statusAndJoinRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  leftContent: { flex: 1, flexDirection: 'column', justifyContent: 'center' },
+  userStatusRow: { flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 10 },
+  statusContainer: { flexDirection: 'row', alignItems: 'center' },
   joinButton: {
     paddingVertical: 8,
     paddingHorizontal: 48,
@@ -229,18 +227,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  joinButtonText: {
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  searchIcon: {
-    marginRight: 10,
-    fontSize: 16,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-  },
+  joinButtonText: { fontWeight: '600', fontSize: 14 },
+  searchIcon: { marginRight: 10, fontSize: 16 },
+  searchInput: { flex: 1, fontSize: 16 },
   tabButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
@@ -248,16 +237,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
   },
-  tabText: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  content: {
-    flex: 1,
-  },
-  roomList: {
-    paddingHorizontal: 20,
-  },
+  tabText: { fontSize: 16, fontWeight: '500' },
+  content: { flex: 1 },
+  roomList: { paddingHorizontal: 20 },
   roomItem: {
     borderRadius: 16,
     padding: 16,
@@ -273,13 +255,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
-  flagContainer: {
-    flexDirection: 'row',
-  },
-  roomFlag: {
-    fontSize: 20,
-    marginRight: 8,
-  },
+  flagContainer: { flexDirection: 'row' },
+  roomFlag: { fontSize: 20, marginRight: 8 },
   heartButton: {
     width: 32,
     height: 32,
@@ -287,48 +264,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  heartIcon: {
-    fontSize: 16,
-  },
-  roomTitle: {
-    fontSize: 18,
-    marginBottom: 12,
-  },
-  roomFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  participantsSection: {
-    flex: 1,
-    flexDirection: 'column',
-  },
-  participantImages: {
-    flexDirection: 'row',
-    marginBottom: 4,
-  },
-  participantImage: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    borderWidth: 2,
-    marginBottom: 24,
-  },
-  spacedImage: {
-    marginLeft: 8,
-  },
-  moreParticipants: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  moreParticipantsText: {
-    fontSize: 10,
-    fontWeight: '600',
-  },
-  participantCount: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
+  heartIcon: { fontSize: 16 },
+  roomTitle: { fontSize: 18, marginBottom: 12 },
+  roomFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  participantsSection: { flex: 1, flexDirection: 'column' },
+  participantImages: { flexDirection: 'row', marginBottom: 4 },
+  participantImage: { width: 48, height: 48, borderRadius: 24, borderWidth: 2, marginBottom: 24 },
+  spacedImage: { marginLeft: 8 },
+  moreParticipants: { justifyContent: 'center', alignItems: 'center' },
+  moreParticipantsText: { fontSize: 10, fontWeight: '600' },
+  participantCount: { fontSize: 12, fontWeight: '500' },
   roomStatus: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -342,9 +287,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#48BB78',
     marginRight: 6,
   },
-  dateCreatedText: {
-    fontSize: 11,
-  },
+  dateCreatedText: { fontSize: 11 },
   shareButton: {
     width: 32,
     height: 32,
@@ -352,9 +295,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  shareIcon: {
-    fontSize: 16,
-  },
+  shareIcon: { fontSize: 16 },
 });
 
 export default ChatexoMainScreen;
