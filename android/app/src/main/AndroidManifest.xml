@@ -19,6 +19,8 @@
   <uses-feature android:name="android.hardware.camera.autofocus"/>
   <uses-feature android:name="android.hardware.audio.output"/>
   <uses-feature android:name="android.hardware.microphone"/>
+
+  <uses-permission android:name="android.permission.WAKE_LOCK" />
   <queries>
     <intent>
       <action android:name="android.intent.action.VIEW"/>

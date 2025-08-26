@@ -6,8 +6,10 @@ import {
   Platform,
   StyleSheet,
   TextInput,
-  TouchableOpacity
+  TouchableOpacity,
+  View
 } from 'react-native';
+import InCallManager from 'react-native-incall-manager';
 import {
   RTCIceCandidate,
   RTCPeerConnection,
@@ -19,16 +21,33 @@ import io from 'socket.io-client';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
-// Server configuration - Update this with your server URL
-const SERVER_URL = 'https://chatexo-server.duckdns.org'; // Android emulator
-// For physical device, use your computer's IP address:
-// const SERVER_URL = 'http://YOUR_COMPUTER_IP:3001'; // e.g., 'http://192.168.1.100:3001'
+declare module 'react-native-webrtc' {
+  interface RTCPeerConnection {
+    onicecandidate: ((event: any) => void) | null;
+    ontrack: ((event: any) => void) | null;
+    onconnectionstatechange: ((event: any) => void) | null;
+    onaddstream: ((event: any) => void) | null;
+  }
+}
 
-// WebRTC configuration
+const SERVER_URL = 'https://chatexo-server.duckdns.org';
+
 const configuration = {
   iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: "stun:stun.l.google.com:19302" },
+    {
+        urls: "stun:relay1.expressturn.com:3478"
+    },
+    {
+        urls: "turn:relay1.expressturn.com:3478",
+        username: "000000002071554186",
+        credential: "+NWiFhr865VmoyGZZDelKqokuZ4="
+    },
+    {
+        urls: "turn:relay1.expressturn.com:3478",
+        username: "efPU52K4SLOQ34W2QY",
+        credential: "1TJPNFxHKXrZfelz"
+    }
   ],
 };
 
@@ -40,7 +59,8 @@ export default function Index() {
   const [permissionsGranted, setPermissionsGranted] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('Disconnected');
   const [userCount, setUserCount] = useState(0);
-  
+  const [isSpeakerOn, setIsSpeakerOn] = useState(false);
+
   const socket = useRef<any>(null);
   const peerConnections = useRef<Map<string, RTCPeerConnection>>(new Map());
   const localStream = useRef<any>(null);
@@ -280,6 +300,9 @@ export default function Index() {
       
       // Get local audio stream
       await getUserMedia();
+      
+      // Start InCallManager to handle audio routing
+      InCallManager.start({ media: 'audio' });
 
       // Join the room
       socket.current?.emit('join-room', {
@@ -302,6 +325,8 @@ export default function Index() {
       socket.current = null;
     }
     
+    // Stop InCallManager
+    InCallManager.stop();
     cleanup();
     setIsConnected(false);
     setIsConnecting(false);
@@ -320,6 +345,12 @@ export default function Index() {
     // Close all peer connections
     peerConnections.current.forEach(pc => pc.close());
     peerConnections.current.clear();
+  };
+
+  const toggleSpeaker = () => {
+    const nextState = !isSpeakerOn;
+    InCallManager.setForceSpeakerphoneOn(nextState);
+    setIsSpeakerOn(nextState);
   };
 
   return (
@@ -381,12 +412,22 @@ export default function Index() {
               </ThemedText>
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity
-              style={[styles.button, styles.endButton]}
-              onPress={endCall}
-            >
-              <ThemedText style={styles.buttonText}>End Call</ThemedText>
-            </TouchableOpacity>
+            <View style={styles.callControlsRow}>
+              <TouchableOpacity
+                style={[styles.button, styles.endButton]}
+                onPress={endCall}
+              >
+                <ThemedText style={styles.buttonText}>End Call</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.speakerButton, isSpeakerOn && styles.speakerButtonActive]}
+                onPress={toggleSpeaker}
+              >
+                <ThemedText style={styles.speakerButtonText}>
+                  {isSpeakerOn ? '🔊' : '📞'}
+                </ThemedText>
+              </TouchableOpacity>
+            </View>
           )}
         </ThemedView>
 
@@ -498,5 +539,26 @@ const styles = StyleSheet.create({
   link: {
     marginTop: 30,
     paddingVertical: 15,
+  },
+  callControlsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  speakerButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#2196F3',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 20,
+  },
+  speakerButtonActive: {
+    backgroundColor: '#0D47A1',
+  },
+  speakerButtonText: {
+    fontSize: 24,
   },
 });
