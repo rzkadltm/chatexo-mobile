@@ -25,10 +25,10 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack
-        initialRouteName={isLoggedIn ? '(main)' : 'index'}
+        initialRouteName={isLoggedIn ? '(main)' : '(auth)'}
         screenOptions={{ headerShown: false }}
       >
-        <Stack.Screen name="index" />
+        <Stack.Screen name="(auth)" />
         <Stack.Screen name="(main)" />
         <Stack.Screen name="+not-found" />
       </Stack>
